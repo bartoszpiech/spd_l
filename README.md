@@ -1,1 +1,1 @@
-# spd_l
+# SPD -- laboratorium
