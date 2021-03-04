@@ -1,1 +1,1 @@
-# SPD -- laboratorium
+# SPD - laboratorium programy
