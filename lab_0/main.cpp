@@ -1,5 +1,5 @@
+﻿#include <iostream>
 #include <cmath>
-#include <iostream>
 #include <algorithm>
 #include <vector>
 
@@ -8,6 +8,8 @@ using namespace std;
 const int P_MIN = 1;
 const int P_MAX = 29;
 const int R_MIN = 1;
+
+
 /*
  * klasa generujaca liczby pseudolosowe
  */
@@ -47,40 +49,114 @@ public:
  */
 class RPQ {
 private:
-
-    vector<int> p;  // czas realizacji
-    vector<int> r;  // czas przygotowania
-
+	int id; // ideks instancji
+	int p;  // czas realizacji
+	int r;  // czas przygotowania
+	
 public:
-    RPQ(int amount, RandomNumberGenerator rng) {
-        for (int i = 0; i < amount; i++) {
-            p.push_back(rng.nextInt(P_MIN, P_MAX));
-        }
-        int A = 0;  // wartosc max losowania czasu przygotowania
-        for (auto i : p) {
-            A += i;
-        }
-        for (int i = 0; i < amount; i++) {
-            r.push_back(rng.nextInt(R_MIN, A));
-        }
-    }
-    
-    void print() {
-        cout << "[" << endl << "r:\t";
-        for (auto i : r) {
-            cout << i << " ";
-        }
-        cout << "\np:\t";
-        for (auto i : p) {
-            cout << i << " ";
-        }
-        cout << "\n]\n";
-    }
-};
-int main () {
-    RandomNumberGenerator rng(1);
+	RPQ(int a, int i) :
+		id(i),
+		p(a)
+	{}
+	int S = 0;	// czas oczekiwania w symulacji
+	int C = 0;	// czas realizacji w symulacji
 
-    RPQ a(10, rng);
-    a.print();
-    return 0;
+	void make_r(int b) { r = b; }
+	int _p() { return p; }
+	int _r() { return r; }
+	int _id() { return id; }
+};
+
+/*
+ * struktura pomocnicza (komparator)
+ */
+struct less_than_key{
+	inline bool operator() (RPQ& class1, RPQ& class2){
+		return (class1._r() < class2._r());
+	}
+};
+
+/*
+ * funkcja zwracajaca maksimum dwoch liczb
+ */
+int max (int a, int b) {
+	return a > b ? a : b;
+}
+
+/*
+ * symulacja RPQ
+ */
+void simulate(vector<RPQ>& container){
+	container[0].S = container[0]._r();
+	container[0].C = container[0]._p() + container[0].S;
+	for (int i = 1; i < container.size(); i++) {
+		container[i].S = max(container[i]._r(), container[i - 1].C);
+		container[i].C = container[i]._p() + container[i].S;
+	}
+}
+
+void show_results(vector<RPQ> container){
+	cout << "nr: [ ";
+	for (auto i : container) {
+		cout << i._id() << " ";
+	}
+	cout << "]\nS: [ ";
+	for (auto i : container) {
+		cout << i.S << " ";
+	}
+	cout << "]\nC: [ ";
+	for (auto i : container) {
+		cout << i.C << " ";
+	}
+	cout << "]\n\n";
+}
+
+void show_generated(vector<RPQ> container) {
+	cout << "nr: [ ";
+	for (auto i : container) {
+		cout << i._id() << " ";
+	}
+	cout << "]\nr: [ ";
+	for (auto i : container) {
+		cout << i._r() << " ";
+	}
+	cout << "]\np: [ ";
+	for (auto i : container) {
+		cout << i._p() << " ";
+	}
+	cout << "]\n\n";
+}
+
+int main() {
+	int _size;
+	int _seed;
+	cout << "Wprowadz ziarno: ";
+	cin >> _seed;
+	cout << "Wprowadz rozmiar problemu: ";
+	cin >> _size;
+
+	RandomNumberGenerator rng(_seed);
+	std::vector<RPQ> container;
+	int A = 0;
+
+	// generowanie instancji
+	for (int i = 0; i < _size; i++) {
+		container.emplace_back(rng.nextInt(P_MIN, P_MAX), i+1);
+		A += container[i]._p();
+	}
+	for (auto &i : container) {
+		i.make_r(rng.nextInt(R_MIN, A));
+	}
+	show_generated(container);
+
+	// symulowanie rezulatu
+	simulate(container);
+	show_results(container);
+
+	// optymalizacja i ponowne symulowanie rezultatu
+	sort(container.begin(), container.end(), less_than_key());
+	simulate(container);
+	show_results(container);
+
+	return 0;
 }
