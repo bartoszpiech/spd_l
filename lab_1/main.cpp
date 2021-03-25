@@ -10,8 +10,6 @@ const int P_MIN = 1;
 const int P_MAX = 29;
 const int R_MIN = 1;
 
-int _size = 6;
-int _seed = 1;
 
 /*
  * klasa generujaca liczby pseudolosowe
@@ -78,7 +76,7 @@ public:
 };
 
 /*
- * struktura pomocnicza (komparator)
+ * struktury pomocnicze (komparatory)
  */
 
 struct less_than_by_R {
@@ -99,7 +97,9 @@ struct more_than_by_R {
 	}
 };
 
-
+/*
+ * funkcja zwracajaca maksimum dwoch liczb
+ */
 int max(int a, int b) {
 	return a > b ? a : b;
 }
@@ -121,35 +121,49 @@ int simulate(vector<RPQ>& container) {
 	return cmax;
 }
 
+/*
+ * funkcja pokazujaca wyniki rpq
+ */
 void show_results(vector<RPQ> container){
 	cout << "nr: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i]._id() << " ";
+	for (auto i : container) {
+		cout << i._id() << " ";
+	}
 	cout << "]\nS: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i].S << " ";
+	for (auto i : container) {
+		cout << i.S << " ";
+	}
 	cout << "]\nC: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i].C << " ";
+	for (auto i : container) {
+		cout << i.C << " ";
+	}
 	cout << "]\nCq: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i].Cq << " ";
+	for (auto i : container) {
+		cout << i.Cq << " ";
+	}
 	cout << "]\n";
 }
 
+/*
+ * funkcja pokazujaca wygenerowana instancje rpq
+ */
 void show_generated(vector<RPQ> container) {
 	cout << "nr: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i]._id() << " ";
+	for (auto i : container) {
+		cout << i._id() << " ";
+	}
 	cout << "]\nr: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i]._r() << " ";
+	for (auto i : container) {
+		cout << i._r() << " ";
+	}
 	cout << "]\np: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i]._p() << " ";
+	for (auto i : container) {
+		cout << i._p() << " ";
+	}
 	cout << "]\nq: [ ";
-	for (int i = 0; i < _size; i++)
-		cout << container[i]._q() << " ";
+	for (auto i : container) {
+		cout << i._q() << " ";
+	}
 	cout << "]\n\n";
 }
 
@@ -190,7 +204,7 @@ vector<RPQ> schrage(vector<RPQ> N) {
 			N.pop_back();
 		}
 		if (!G.empty()) {
-            sort(G.begin(), G.end(), [](RPQ& x, RPQ& y) { return (x._q() < y._q()); });
+			sort(G.begin(), G.end(), [](RPQ& x, RPQ& y) { return (x._q() < y._q()); });
 			pi.push_back(G.back());
 			G.pop_back();
 			t += pi.back()._p();
@@ -208,9 +222,8 @@ vector<RPQ> schrage_interrupts(vector<RPQ> N) {
 	vector<RPQ> pi;
 	priority_queue<RPQ, vector<RPQ>, less_than_by_Q> G; // kolejka priorytetowa dla Q
 	sort(N.begin(), N.end(), [](RPQ& x, RPQ& y) { return (x._r() > y._r()); });
-    
 	int t = N.back()._r();
-    int C_max = t;
+	int C_max = t;
 	while (!G.empty() || !N.empty()) {
 		while (!N.empty() && N.back()._r() <= t) {
 			G.push(N.back());
@@ -219,85 +232,86 @@ vector<RPQ> schrage_interrupts(vector<RPQ> N) {
 		if (!G.empty()) {
 			pi.push_back(G.top());
 			t += pi.back()._p();
-            int tmp = C_max;
-            C_max = max(C_max, t+G.top()._q());
-            if (tmp != C_max) {
-                int r = t - N.back()._r();
-                G.top().S = 1;
-                
-            }
-     
-            G.pop();
+			int tmp = C_max;
+			C_max = max(C_max, t+G.top()._q());
+			if (tmp != C_max) {
+				int r = t - N.back()._r();
+				G.top().S = 1;
+			}
+			G.pop();
 		}
 		else t = N.back()._r();
 	}
 	return pi;
 }
 */
+
+/*
+ * algorytm Schrage z przerwaniami
+ */
 vector<RPQ> schrage_interrupts(vector<RPQ> N) {
 	vector<RPQ> pi;
 	vector<RPQ> G; // wektor dla Q
 	sort(N.begin(), N.end(), [](RPQ& x, RPQ& y) { return (x._r() > y._r()); });
 	int t = N.back()._r();
-    int C_max = t;
+	int C_max = t;
 	while (!G.empty() || !N.empty()) {
 		while (!N.empty() && N.back()._r() <= t) {
 			G.emplace_back(N.back());
 			N.pop_back();
 		}
 		if (!G.empty()) {
-            sort(G.begin(), G.end(), [](RPQ& x, RPQ& y) { return (x._q() < y._q()); });
+			sort(G.begin(), G.end(), [](RPQ& x, RPQ& y) { return (x._q() < y._q()); });
 			pi.push_back(G.back());
-            t += pi.back()._p();
-            int tmp = C_max;
-            
-            C_max = max(C_max, t+G.front()._q());
-            if (tmp != C_max ) {
-                int r = t - N.back()._r();
-                G.back().make_p(r);
-                
-            } 
+			t += pi.back()._p();
+			int tmp = C_max;
+			C_max = max(C_max, t+G.front()._q());
+			if (tmp != C_max ) {
+				int r = t - N.back()._r();
+				G.back().make_p(r);
+			}
 			G.pop_back();
-            
-			
+		} else {
+			t = N.back()._r();
 		}
-		else t = N.back()._r();
 	}
 	return pi;
 }
 
 int main() {
+	int seed, size;
 	cout << "Wprowadz ziarno: ";
-	cin >> _seed;
+	cin >> seed;
 	cout << "Wprowadz rozmiar problemu: ";
-	cin >> _size;
+	cin >> size;
 
-	RandomNumberGenerator rng(_seed);
+	RandomNumberGenerator rng(seed);
 	std::vector<RPQ> container;
 	int A = 0;
 
-	//******************generowanie instancji******************
-	for (int i = 0; i < _size; i++) {
+	// generowanie instancji
+	for (int i = 0; i < size; i++) {
 		container.emplace_back(rng.nextInt(P_MIN, P_MAX), i+1);
 		A += container[i]._p();
 	}
-	for (int i = 0; i < _size; i++)
-		container[i].make_r(rng.nextInt(R_MIN, A));
-	for (int i = 0; i < _size; i++)
-		container[i].make_q(rng.nextInt(R_MIN, A));
+	for (auto &i : container) {
+		i.make_r(rng.nextInt(R_MIN, A));
+	}
+	for (auto &i : container) {
+		i.make_q(rng.nextInt(R_MIN, A));
+	}
 	show_generated(container);
 
-	//******************symulowanie rezulatu*******************
+	// symulowanie rezulatu
 	int Cq_max = simulate(container);
 	show_results(container);
-    cout << "Cq_max = " << Cq_max << "\n\n";
+	cout << "Cq_max = " << Cq_max << "\n\n";
 
-	//******optymalizacja algorytmem Schrage i ponowne symulowanie rezultatu******
+	// optymalizacja algorytmem Schrage i ponowne symulowanie rezultatu
 	container = schrage_interrupts(container);
 	Cq_max = simulate(container);
 	show_results(container);
-    cout << "Cq_max = " << Cq_max;
-
+	cout << "Cq_max = " << Cq_max;
 
 	return 0;
 }

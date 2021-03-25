@@ -89,7 +89,7 @@ int max (int a, int b) {
 void simulate(vector<RPQ>& container){
 	container[0].S = container[0]._r();
 	container[0].C = container[0]._p() + container[0].S;
-	for (int i = 1; i < container.size(); i++) {
+	for (unsigned int i = 1; i < container.size(); i++) {
 		container[i].S = max(container[i]._r(), container[i - 1].C);
 		container[i].C = container[i]._p() + container[i].S;
 	}
