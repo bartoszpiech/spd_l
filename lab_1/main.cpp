@@ -60,19 +60,23 @@ public:
 		id = i;
 		p = a;
 	}
+	RPQ() {
+		id = 0;
+		p = 0;
+		r = 0;
+		q = 0;
+	}
 	int S = 0;	// czas oczekiwania w symulacji
 	int C = 0;	// czas realizacji w symulacji
 	int Cq = 0; // czas rezlizacji + czas stygniecia
 
 	void make_r(int b) { r = b; }
 	void make_q(int c) { q = c; }
-    void make_p(int d) { p = d; }
-	 int _p() const { return p; }
-	 int _r() const { return r; }
-	 int _q() const { return q; }
-	 int _id() const { return id; }
-
-
+	void make_p(int d) { p = d; }
+	int _p() const { return p; }
+	int _r() const { return r; }
+	int _q() const { return q; }
+	int _id() const { return id; }
 };
 
 /*
@@ -215,66 +219,97 @@ vector<RPQ> schrage(vector<RPQ> N) {
 }
 
 /*
- * algorytm Schrage z przerwaniami
+ * funkcja pomocnicza zwracajaca minimalna wartosc r z wektora RPQ i usuwa go
  */
- /*
-vector<RPQ> schrage_interrupts(vector<RPQ> N) {
-	vector<RPQ> pi;
-	priority_queue<RPQ, vector<RPQ>, less_than_by_Q> G; // kolejka priorytetowa dla Q
-	sort(N.begin(), N.end(), [](RPQ& x, RPQ& y) { return (x._r() > y._r()); });
-	int t = N.back()._r();
-	int C_max = t;
-	while (!G.empty() || !N.empty()) {
-		while (!N.empty() && N.back()._r() <= t) {
-			G.push(N.back());
-			N.pop_back();
+RPQ pop_min_r(vector<RPQ> &container) {
+	RPQ tmp = container[0];
+	int position = 0;
+	for (unsigned int i = 0; i < container.size(); i++) {
+		if (tmp._r() > container[i]._r()) {
+			position = i;
+			tmp = container[i];
 		}
-		if (!G.empty()) {
-			pi.push_back(G.top());
-			t += pi.back()._p();
-			int tmp = C_max;
-			C_max = max(C_max, t+G.top()._q());
-			if (tmp != C_max) {
-				int r = t - N.back()._r();
-				G.top().S = 1;
-			}
-			G.pop();
-		}
-		else t = N.back()._r();
 	}
-	return pi;
+	container.erase(container.begin() + position);
+	return tmp;
 }
-*/
 
 /*
- * algorytm Schrage z przerwaniami
+ * funkcja pomocnicza zwracajaca minimalna wartosc r z wektora RPQ
  */
-vector<RPQ> schrage_interrupts(vector<RPQ> N) {
-	vector<RPQ> pi;
-	vector<RPQ> G; // wektor dla Q
-	sort(N.begin(), N.end(), [](RPQ& x, RPQ& y) { return (x._r() > y._r()); });
-	int t = N.back()._r();
-	int C_max = t;
-	while (!G.empty() || !N.empty()) {
-		while (!N.empty() && N.back()._r() <= t) {
-			G.emplace_back(N.back());
-			N.pop_back();
-		}
-		if (!G.empty()) {
-			sort(G.begin(), G.end(), [](RPQ& x, RPQ& y) { return (x._q() < y._q()); });
-			pi.push_back(G.back());
-			t += pi.back()._p();
-			int tmp = C_max;
-			C_max = max(C_max, t+G.front()._q());
-			if (tmp != C_max ) {
-				int r = t - N.back()._r();
-				G.back().make_p(r);
-			}
-			G.pop_back();
-		} else {
-			t = N.back()._r();
+int get_min_r(vector<RPQ> container) {
+	RPQ tmp = container[0];
+	for (unsigned int i = 0; i < container.size(); i++) {
+		if (tmp._r() > container[i]._r()) {
+			tmp = container[i];
 		}
 	}
+	return tmp._r();
+}
+
+/*
+ * funkcja pomocnicza zwracajaca maksymalna wartosc q z wektora RPQ i usuwa go
+ */
+RPQ pop_max_q(vector<RPQ> &container) {
+	RPQ tmp = container[0];
+	int position = 0;
+	for (unsigned int i = 0; i < container.size(); i++) {
+		if (tmp._q() < container[i]._q()) {
+			position = i;
+			tmp = container[i];
+		}
+	}
+	container.erase(container.begin() + position);
+	return tmp;
+}
+
+/*
+ * funkcja pomocnicza zwracajaca minimalna wartosc r z wektora RPQ bez usuwania
+ */
+int get_max_q(vector<RPQ> &container) {
+	RPQ tmp = container[0];
+	for (unsigned int i = 0; i < container.size(); i++) {
+		if (tmp._q() < container[i]._q()) {
+			tmp = container[i];
+		}
+	}
+	return tmp._q();
+}
+
+/*
+ * algorytm Schrage z przerwaniami bez uzycia kolejek
+ */
+vector<RPQ> schrage_interrupts(vector<RPQ> N) {
+	int k = 1;
+	RPQ j, actual;
+	vector<RPQ> pi;
+	vector<RPQ> G;
+	int t = get_min_r(N);
+	int C_max = t;
+	while (!G.empty() || !N.empty()) {
+		while (!N.empty() && get_min_r(N) <= t) {
+			j = pop_min_r(N);	// usuwa tez z N
+			G.push_back(j);
+			if (j._q() > actual._q()) {
+				actual.make_p(t - j._r());
+				t = j._r();
+				if (actual._p() > 0) {
+					G.push_back(actual);
+				}
+			}
+		}
+		if (!G.empty()) {
+			j = pop_max_q(G);
+			actual = j;
+			pi.push_back(j);
+			t += j._p();
+			C_max = max(C_max, t+j._q());
+			k++;
+		} else {
+			t = get_min_r(N);
+		}
+	}
+	cout << "Cmax :" << C_max << endl;
 	return pi;
 }
 
@@ -307,11 +342,10 @@ int main() {
 	show_results(container);
 	cout << "Cq_max = " << Cq_max << "\n\n";
 
-	// optymalizacja algorytmem Schrage i ponowne symulowanie rezultatu
+	// optymalizacja algorytmem Schrage i wyswietlenie rezultatu
 	container = schrage_interrupts(container);
 	Cq_max = simulate(container);
 	show_results(container);
-	cout << "Cq_max = " << Cq_max;
-
+	cout << "Cq_max = " << Cq_max << "\n\n";
 	return 0;
 }
