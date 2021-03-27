@@ -96,33 +96,33 @@ void simulate(vector<RPQ>& container){
 }
 
 void show_results(vector<RPQ> container){
-	cout << "nr: [ ";
+	cout << "nr:[\t";
 	for (auto i : container) {
-		cout << i._id() << " ";
+		cout << i._id() << "\t";
 	}
-	cout << "]\nS: [ ";
+	cout << "]\nS: [\t";
 	for (auto i : container) {
-		cout << i.S << " ";
+		cout << i.S << "\t";
 	}
-	cout << "]\nC: [ ";
+	cout << "]\nC: [\t";
 	for (auto i : container) {
-		cout << i.C << " ";
+		cout << i.C << "\t";
 	}
 	cout << "]\n\n";
 }
 
 void show_generated(vector<RPQ> container) {
-	cout << "nr: [ ";
+	cout << "nr:[\t";
 	for (auto i : container) {
-		cout << i._id() << " ";
+		cout << i._id() << "\t";
 	}
-	cout << "]\nr: [ ";
+	cout << "]\nr: [\t";
 	for (auto i : container) {
-		cout << i._r() << " ";
+		cout << i._r() << "\t";
 	}
-	cout << "]\np: [ ";
+	cout << "]\np: [\t";
 	for (auto i : container) {
-		cout << i._p() << " ";
+		cout << i._p() << "\t";
 	}
 	cout << "]\n\n";
 }

@@ -1,11 +1,16 @@
-CC = g++
-CFLAGS = -pedantic -Wall -g -std=c++17
+CC = gcc
+CPP = g++
+CPPFLAGS = -pedantic -Wall -g -std=c++17
+CFLAGS = -pedantic -Wall -g -lm
 NAME = program
 
-default: $(NAME)
+default: cpp
 
-$(NAME): main.cpp
-	$(CC) $^ -o $@.out $(CFLAGS)
+cpp: main.cpp
+	$(CPP) $^ -o $(NAME).out $(CPPFLAGS)
+
+c: main.c
+	$(CC) $^ -o $(NAME).out $(CFLAGS)
 
 clean:
 	rm *.out
