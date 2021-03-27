@@ -5,8 +5,8 @@ NAME = program
 default: $(NAME)
 
 $(NAME): main.cpp
-	$(CC) $^ -o $@ $(CFLAGS)
+	$(CC) $^ -o $@.out $(CFLAGS)
 
 clean:
-	rm $(NAME)
+	rm *.out
 

@@ -128,8 +128,8 @@ void show_generated(vector<RPQ> container) {
 }
 
 int main() {
-	int _size;
 	int _seed;
+	int _size;
 	cout << "Wprowadz ziarno: ";
 	cin >> _seed;
 	cout << "Wprowadz rozmiar problemu: ";
