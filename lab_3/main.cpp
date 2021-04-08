@@ -8,16 +8,13 @@ using namespace std;
 const int P_MIN = 1;
 const int P_MAX = 29;
 
-
 /*
  * klasa generujaca liczby pseudolosowe
  */
 class RandomNumberGenerator
 {
 private:
-
 	long seed;
-
 public:
 	RandomNumberGenerator(long seedValue) :
 		seed(seedValue)
@@ -43,110 +40,57 @@ public:
 	}
 };
 
-/*
 class FSP {
 	public:
-		int id;		// indeks
-		int *p;
+		int tasks;
+		int machines;
+		int **arr;
+		FSP(int t, int m) {
+			tasks = t;
+			machines = m;
+			arr = new int*[tasks];
+			for (int i = 0; i < tasks; i++) {
+				arr[i] = new int[machines];
+			}
+		}
+		~FSP() {
+			for (int i = 0; i < tasks; i++) {
+				delete(arr[i]);
+			}
+			delete(arr);
+		}
+		void generate(RandomNumberGenerator &rng) {
+			for (int i = 0; i < tasks; i++) {
+				for (int j = 0; j < machines; j++) {
+					arr[i][j] = rng.nextInt(P_MIN, P_MAX);
+				}
+			}
+		}
 
-		FSP(int i, RandomNumberGenerator &rng) {
-		*/
+		void print() {
+			cout << "[ ";
+			for (int i = 0; i < tasks; i++) {
+				cout << "[ ";
+				for (int j = 0; j < machines; j++) {
+					cout << arr[i][j] << " ";
+				}
+				cout << "] ";
+			}
+			cout << "]\n";
+		}
 
-
-/*
- * klasa zawierajaca wartosci problemu jednomaszynowego
- */
-class RPQ {
-private:
-	int id; // ideks instancji
-	int p;  // czas realizacji
-	int r;  // czas przygotowania
-	
-public:
-	RPQ(int a, int i) :
-		id(i),
-		p(a)
-	{}
-	int S = 0;	// czas oczekiwania w symulacji
-	int C = 0;	// czas realizacji w symulacji
-
-	void make_r(int b) { r = b; }
-	int _p() { return p; }
-	int _r() { return r; }
-	int _id() { return id; }
+		// to do
+		void johnsons_algorithm() {
+			int l = 1;
+			int k = tasks;
+			while (1) {
+			}
+		}
 };
 
-/*
- * struktura pomocnicza (komparator)
- */
-struct less_than_key{
-	inline bool operator() (RPQ& class1, RPQ& class2){
-		return (class1._r() < class2._r());
-	}
-};
-
-/*
- * funkcja zwracajaca maksimum dwoch liczb
- */
-int max (int a, int b) {
+int max(int a, int b) {
 	return a > b ? a : b;
 }
-
-/*
- * symulacja RPQ
- */
-void simulate(vector<RPQ>& container){
-	container[0].S = container[0]._r();
-	container[0].C = container[0]._p() + container[0].S;
-	for (unsigned int i = 1; i < container.size(); i++) {
-		container[i].S = max(container[i]._r(), container[i - 1].C);
-		container[i].C = container[i]._p() + container[i].S;
-	}
-}
-
-void show_results(vector<RPQ> container){
-	cout << "nr:[\t";
-	for (auto i : container) {
-		cout << i._id() << "\t";
-	}
-	cout << "]\nS: [\t";
-	for (auto i : container) {
-		cout << i.S << "\t";
-	}
-	cout << "]\nC: [\t";
-	for (auto i : container) {
-		cout << i.C << "\t";
-	}
-	cout << "]\n\n";
-}
-
-void show_generated(vector<RPQ> container) {
-	cout << "nr:[\t";
-	for (auto i : container) {
-		cout << i._id() << "\t";
-	}
-	cout << "]\nr: [\t";
-	for (auto i : container) {
-		cout << i._r() << "\t";
-	}
-	cout << "]\np: [\t";
-	for (auto i : container) {
-		cout << i._p() << "\t";
-	}
-	cout << "]\n\n";
-}
-
-/*
-void print(int **p) {
-	for (int i = 0; i < size[0]; i++) {
-		cout << "[";
-		for (int j = 0; j < size[1]; j++) {
-			cout << p[i][j] << " ";
-		}
-		cout << "],";
-	}
-}
-*/
 
 int main() {
 	int seed;
@@ -154,71 +98,24 @@ int main() {
 	cout << "Wprowadz ziarno: ";
 	cin >> seed;
 	cout << "Wprowadz rozmiar problemu: ";
-	cin >> size[0];
-	cin >> size[1];
+	cin >> size[0] >> size[1];
 
 	RandomNumberGenerator rng(seed);
+
+	FSP p = FSP(size[0], size[1]);
+	FSP c = FSP(size[0], size[1]);
 	
-	int p[size[0]][size[1]];
-	int S[size[0]][size[1]];
-	int C[size[0]][size[1]];
-	for (int i = 0; i < size[0]; i++) {
-		for (int j = 0; j < size[1]; j++) {
-			p[i][j] = rng.nextInt(P_MIN, P_MAX);
-		}
-	}
-
-	for (int i = 0; i < size[0]; i++) {
-		cout << "[";
-		for (int j = 0; j < size[1]; j++) {
-			cout << p[i][j] << " ";
-		}
-		cout << "],";
-	}
-	cout << "\n";
-
-	S[0][0] = 0;
-	S[0][1] = p[0][0];
-	C[0][0] = S[0][1];
-	C[0][1] = S[0][1] + p[0][1];
+	p.generate(rng);
+	p.print();
+	
+	// solve cost
+	c.arr[0][0] = p.arr[0][0];
+	c.arr[0][1] = c.arr[0][0] + p.arr[1][0];
 	for (int i = 1; i < size[0]; i++) {
-		for (int j = 0; j < size[1]; j++) {
-			S[i][j] = S[i-1][j] + p[i][j];
-		}
+		c.arr[i][0] = c.arr[i-1][0] + p.arr[i][0];
+		c.arr[i][1] = max(c.arr[i][0], c.arr[i-1][1]) + p.arr[i][1];
 	}
-
-	for (int i = 0; i < size[0]; i++) {
-		cout << "[";
-		for (int j = 0; j < size[1]; j++) {
-			cout << S[i][j] << " ";
-		}
-		cout << "],";
-	}
-
-	
-	/*
-	std::vector<RPQ> container;
-	int A = 0;
-
-	// generowanie instancji
-	for (int i = 0; i < _size; i++) {
-		container.emplace_back(rng.nextInt(P_MIN, P_MAX), i+1);
-		A += container[i]._p();
-	}
-	for (auto &i : container) {
-		i.make_r(rng.nextInt(R_MIN, A));
-	}
-	show_generated(container);
-
-	// symulowanie rezulatu
-	simulate(container);
-	show_results(container);
-
-	// optymalizacja i ponowne symulowanie rezultatu
-	sort(container.begin(), container.end(), less_than_key());
-	simulate(container);
-	show_results(container);
-	*/
+	c.print();
 
 	return 0;
 }
