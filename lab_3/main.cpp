@@ -45,6 +45,7 @@ class FSP {
 		int tasks;
 		int machines;
 		int **arr;
+
 		FSP(int t, int m) {
 			tasks = t;
 			machines = m;
@@ -79,14 +80,31 @@ class FSP {
 			cout << "]\n";
 		}
 
-		// to do
-		void johnsons_algorithm() {
-			int l = 1;
-			int k = tasks;
-			while (1) {
+		int solve_cost() {
+			FSP c = FSP(this->tasks, this->machines);
+			c.arr[0][0] = this->arr[0][0];
+			for(int j = 1; j < this->machines; j++) {
+				c.arr[0][j] = c.arr[0][j-1] + this->arr[1][j-1];
 			}
+			for (int i = 1; i < this->tasks; i++) {
+				c.arr[i][0] = c.arr[i-1][0] + this->arr[i][0];
+				for(int j = 1; j < this->machines; j++) {
+					c.arr[i][j] = max(c.arr[i][j-1], c.arr[i-1][j]) + this->arr[i][j];
+				}
+			}
+			cout << "C: ";
+			c.print();
+			return c.arr[this->tasks - 1][this->machines - 1];
 		}
+
 };
+
+void johnsons_algorithm(FSP N) {
+	int l = 1;
+	int k = N.tasks;
+	
+
+}
 
 int max(int a, int b) {
 	return a > b ? a : b;
@@ -103,19 +121,11 @@ int main() {
 	RandomNumberGenerator rng(seed);
 
 	FSP p = FSP(size[0], size[1]);
-	FSP c = FSP(size[0], size[1]);
-	
+
 	p.generate(rng);
 	p.print();
-	
-	// solve cost
-	c.arr[0][0] = p.arr[0][0];
-	c.arr[0][1] = c.arr[0][0] + p.arr[1][0];
-	for (int i = 1; i < size[0]; i++) {
-		c.arr[i][0] = c.arr[i-1][0] + p.arr[i][0];
-		c.arr[i][1] = max(c.arr[i][0], c.arr[i-1][1]) + p.arr[i][1];
-	}
-	c.print();
+
+	cout << "c max: " << p.solve_cost() << endl;
 
 	return 0;
 }
