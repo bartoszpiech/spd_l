@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 #include <vector>
+#include <cstring>
 
 using namespace std;
 
@@ -44,21 +45,18 @@ class FSP {
 	public:
 		int tasks;
 		int machines;
-		vector<int*>arr;
+		vector<vector<int>>arr;
 
 		FSP(int t, int m) {
 			tasks = t;
 			machines = m;
-			arr.resize(t);
+			arr.resize(tasks);
 			for (int i = 0; i < tasks; i++) {
-				arr[i] = new int[machines];
+				arr[i].resize(machines);
 			}
 		}
-		~FSP() {
-			for (auto i : arr) {
-				delete(i);
-			}
-		}
+
+		~FSP() { }
 
 		void generate(RandomNumberGenerator &rng) {
 			for (int i = 0; i < tasks; i++) {
