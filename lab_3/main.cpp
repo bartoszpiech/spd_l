@@ -91,8 +91,10 @@ class FSP {
 					c.arr[i][j] = max(c.arr[i][j-1], c.arr[i-1][j]) + arr[i][j];
 				}
 			}
-			cout << "C: ";
+			/*
+			cout << "\n";
 			c.print();
+			*/
 			return c.arr[tasks - 1][machines - 1];
 		}
 
@@ -116,8 +118,13 @@ class FSP {
 
 };
 
+int max(int a, int b) {
+	return a > b ? a : b;
+}
+
 /*
- * to do - dodac wersje dla wiekszej liczby maszyn niz 3
+ * algorytm johnsona dla Flowshopu, dziala optymalnie dla dwoch maszyn,
+ * dla wiekszej ilosci moze polepszyc wynik lecz nie ma pewnosci
  */
 FSP johnsons_algorithm(FSP N) {
 	FSP pi(N.tasks, N.machines);
@@ -125,7 +132,7 @@ FSP johnsons_algorithm(FSP N) {
 	int k = N.tasks - 1;	// tu to samo
 	while (!N.arr.empty()) {
 		int j = N.get_index_of_shortest_execution_time();
-		if (N.arr[j][0] < N.arr[j][1]) {
+		if (N.arr[j][0] < N.arr[j][N.machines - 1]) {
 			pi.arr[l] = N.arr[j];
 			l++;
 		} else {
@@ -137,8 +144,18 @@ FSP johnsons_algorithm(FSP N) {
 	return pi;
 }
 
-int max(int a, int b) {
-	return a > b ? a : b;
+/*
+ * algorytm brute force dla Flowshopu, dziala optymalnie ale ma zlozonosc o(n!)
+ */
+FSP brute_force(FSP N) {
+	FSP pi = N;
+	sort(N.arr.begin(), N.arr.end());
+	do {
+		if (pi.solve_cost() > N.solve_cost()) {
+			pi = N;
+		}
+	} while (next_permutation(N.arr.begin(), N.arr.end()));
+	return pi;
 }
 
 int main() {
@@ -161,5 +178,11 @@ int main() {
 	pi.print();
 
 	cout << "C max: " << pi.solve_cost() << endl;
+
+	cout << "Brute force:\n";
+	pi = brute_force(vec);
+	pi.print();
+	cout << "C max: " << pi.solve_cost() << endl;
+
 	return 0;
 }
