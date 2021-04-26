@@ -46,6 +46,8 @@ class FSP {
 		int tasks;
 		int machines;
 		vector<vector<int>>arr;
+		int LB;
+		int UB;
 
 		FSP(int t, int m) {
 			tasks = t;
@@ -85,18 +87,19 @@ class FSP {
 				c.arr[0][j] = c.arr[0][j-1] + arr[0][j];
 				//cout << "c.arr[0]["<<j<<"]=" << c.arr[0][j] << "\n";
 			}
-			for (int i = 1; i < tasks; i++) {
+			for (unsigned int i = 1; i < arr.size(); i++) {
 				c.arr[i][0] = c.arr[i-1][0] + arr[i][0];
 				for(int j = 1; j < machines; j++) {
 					c.arr[i][j] = max(c.arr[i][j-1], c.arr[i-1][j]) + arr[i][j];
 				}
 			}
 			/*
-			cout << "\n";
+			cout << "C: ";
 			c.print();
 			*/
 			return c.arr[tasks - 1][machines - 1];
 		}
+
 
 		int get_index_of_shortest_execution_time() {
 			if (arr.size() < 0) {
@@ -116,8 +119,29 @@ class FSP {
 			return result;
 		}
 
+		// zwraca sume dla wszystkich maszyn
+		int sum() {
+			int result = 0;
+			for (unsigned int i = 0; i < arr.size(); i++) {
+				for (int j = 0; j < machines; j++) {
+					result += arr[i][j];
+				}
+			}
+			return result;
+		}
+
+		// zwraca sume dla pojedynczej maszyny
+		int single_sum(int index) {
+			int result = 0;
+			for (unsigned int i = 0; i < arr.size(); i++) {
+					result += arr[i][index];
+			}
+			return result;
+		}
+
 };
 
+// zwraca maksimum dwoch liczb
 int max(int a, int b) {
 	return a > b ? a : b;
 }
@@ -158,6 +182,51 @@ FSP brute_force(FSP N) {
 	return pi;
 }
 
+int _LB(int index, FSP pi, FSP N) {
+	int LB=0;
+	if (index == 0) {
+		LB = pi.solve_cost() + N.sum();
+	}
+	if (index >= 1) {
+		for (int i = 0; i < N.machines; i++)
+		{
+			max(LB, pi.solve_cost()+ N.single_sum(i));
+		}
+	}
+	return LB;
+}
+
+void bnb_procedure(int j, FSP &N2, FSP &pi2, FSP &pi3, int &UB) {
+	FSP pi = pi2;
+	FSP N = N2;
+	pi.arr.push_back(N.arr[j]);
+	N.arr.erase(N.arr.begin() + j);
+	if (!N.arr.empty()) {
+		N.LB = _LB(N.arr.size(), pi, N);
+		if (N.LB < UB) {
+			for (unsigned int i = 0; i < N.arr.size(); i++)
+				bnb_procedure(i, N, pi, pi3, UB);
+		}
+	}
+	else {
+		int c_max = pi.solve_cost();
+		if (c_max < UB) {
+			UB = c_max;
+			pi3 = pi;
+		}
+	}
+}
+
+FSP bnb_algorithm(FSP N, int _UB) {
+	FSP pi(N.tasks, N.machines);
+	FSP pi2(N.tasks, N.machines);
+	pi.arr.clear();
+	int UB = _UB;
+	for (unsigned int i = 0; i < N.arr.size(); i++)
+		bnb_procedure(i, N, pi, pi2, UB);
+	cout << UB;
+	return pi2;
+}
 int main() {
 	int seed;
 	int size[2];
@@ -176,7 +245,6 @@ int main() {
 	FSP pi = johnsons_algorithm(vec);
 	cout << "Algorytm Johnsona:\n";
 	pi.print();
-
 	cout << "C max: " << pi.solve_cost() << endl;
 
 	cout << "Brute force:\n";
@@ -184,5 +252,9 @@ int main() {
 	pi.print();
 	cout << "C max: " << pi.solve_cost() << endl;
 
+	cout << "Algorytm BnB:\n";
+	pi = bnb_algorithm(vec, pi.solve_cost());
+	pi.print();
+	cout << "C max: " << pi.solve_cost() << endl;
 	return 0;
 }
