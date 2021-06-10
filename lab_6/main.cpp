@@ -192,25 +192,36 @@ double random_double(double min, double max) {
 	double tmp = (double)rand() / RAND_MAX;
 	return min + tmp * (max - min);
 }
-
+/*
+ * algorytm symulowanego wyzarzania, inspirowany przemyslem metalurgicznym,
+ * im cieplejszy element, tym jest bardziej plastyczny - w tym przypadku
+ * im większa temperatura, tym większa szansa na zmianę wyniku na
+ * zaakceptowanie wyniku z gorszym wynikiem
+ */
 FP simulated_annealing(FP N, int T_0, int T_end, int L) {
-	int T = T_0;
+	// aktualna temperatura
+    int T = T_0;
+    // nasze rozwiazanie poczatkowe
 	FP pi = N;
+    // najlepsze rozwiazanie dotychczas
 	FP best_pi = pi;
+    // iterator do chlodzenia logarytmicznego
 	int it = 0;
 	while (T > T_end) {
 		for (int k = 1; k < L; k++) {
+            // wylosowanie dwoch indeksow do zamiany
 			int i = rand() % pi.tasks;
-			int j;
-			do {
-				j = rand() % pi.tasks;
-			} while (i == j);
+			int j = rand() % pi.tasks;
+			while (i == j) {
+            	j = rand() % pi.tasks;
+			}
 			FP new_pi = pi;
 			// zamiana elementow
 			new_pi.arr[i] = pi.arr[j];
 			new_pi.arr[j] = pi.arr[i];
 			if (new_pi.solve_cost() > pi.solve_cost()) {
-				double r = random_double(0, 1);
+				// wylosowanie losowej liczby od 0 do 1
+                double r = random_double(0, 1);
 				if (r >= exp((pi.solve_cost() - new_pi.solve_cost()) / T)) {
 					new_pi = pi;
 				}
@@ -256,7 +267,7 @@ int main() {
 	pi.print();
 	cout << "C max: " << pi.solve_cost() << endl;
 
-	/*
+	
 	cout << "Brute force:\n";
 	start = clock();
 	pi = brute_force(vec);
@@ -264,7 +275,7 @@ int main() {
 	cout << (double)(stop - start) / CLOCKS_PER_SEC << "s\n";
 	pi.print();
 	cout << "C max: " << pi.solve_cost() << endl;
-	*/
+	
 
 	cout << "Wyżarzanie:\n";
 	start = clock();
